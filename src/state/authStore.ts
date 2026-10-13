@@ -1,9 +1,26 @@
 import { create } from "zustand";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { getFirebaseAuth, getInitError } from "../core/firebase";
-import { friendlyAuthError } from "../core/errors";
+import { errorCode, friendlyAuthError, friendlyGoogleError, friendlyPasswordResetError } from "../core/errors";
 import { authRepository } from "../data/authRepository";
 import { useTaskStore } from "./taskStore";
+
+function logAuthFailure(operation: "sign-in" | "sign-up" | "password-reset", error: unknown) {
+  const details =
+    typeof error === "object" && error !== null
+      ? (error as { message?: unknown; stack?: unknown })
+      : undefined;
+  // console.error opens Expo's red error overlay, which hides the helpful
+  // error message on the login screen. Keep this as a regular diagnostic log.
+  console.log(`[auth:${operation}] Authentication failed`, {
+    code: errorCode(error),
+    message:
+      typeof details?.message === "string"
+        ? details.message
+        : String(error),
+    ...(typeof details?.stack === "string" ? { stack: details.stack } : {}),
+  });
+}
 
 interface AuthState {
   user: User | null;
@@ -13,6 +30,8 @@ interface AuthState {
   init: () => () => void;
   signUp: (email: string, password: string) => Promise<boolean>;
   signIn: (email: string, password: string) => Promise<boolean>;
+  sendPasswordReset: (email: string) => Promise<boolean>;
+  signInWithGoogle: (idToken: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   clearError: () => void;
 }
@@ -56,6 +75,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ loading: false });
       return true;
     } catch (e) {
+      logAuthFailure("sign-up", e);
       set({ loading: false, error: friendlyAuthError(e) });
       return false;
     }
@@ -69,7 +89,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ loading: false });
       return true;
     } catch (e) {
+      logAuthFailure("sign-in", e);
       set({ loading: false, error: friendlyAuthError(e) });
+      return false;
+    }
+  },
+
+  sendPasswordReset: async (email) => {
+    if (get().loading) return false;
+    set({ loading: true, error: null });
+    try {
+      await authRepository.sendPasswordReset(email);
+      set({ loading: false });
+      return true;
+    } catch (e) {
+      logAuthFailure("password-reset", e);
+      set({ loading: false, error: friendlyPasswordResetError(e) });
+      return false;
+    }
+  },
+
+  signInWithGoogle: async (idToken) => {
+    if (get().loading) return false;
+    set({ loading: true, error: null });
+    try {
+      await authRepository.signInWithGoogle(idToken);
+      set({ loading: false });
+      return true;
+    } catch (e) {
+      // Dismissals stay silent; real failures surface a message.
+      set({ loading: false, error: friendlyGoogleError(e) });
       return false;
     }
   },

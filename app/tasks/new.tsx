@@ -2,15 +2,18 @@ import React from "react";
 import { ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { HelperText } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { TaskForm } from "../../src/components/TaskForm";
 import { useTaskStore } from "../../src/state/taskStore";
 import { palette } from "../../src/core/theme";
 import type { TaskInput } from "../../src/domain/task";
+import { parseDateKey } from "../../src/core/date";
 
 export default function NewTask() {
   const router = useRouter();
+  const { date } = useLocalSearchParams<{ date?: string }>();
   const { create, saving, error } = useTaskStore();
+  const initialDueDate = parseDateKey(date);
 
   const onSubmit = async (input: TaskInput) => {
     const ok = await create(input);
@@ -31,6 +34,7 @@ export default function NewTask() {
             saving={saving}
             error={error}
             submitLabel="Create task"
+            initialDueDate={initialDueDate}
             onSubmit={onSubmit}
           />
           {error ? (

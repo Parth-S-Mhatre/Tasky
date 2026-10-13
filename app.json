@@ -7,17 +7,43 @@
     "scheme": "tasky",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "icon": "./assets/app-icon.png",
     "splash": {
       "backgroundColor": "#FFFFFF"
     },
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.tasky.app",
+      "supportsTablet": true,
+      "buildNumber": "1"
     },
     "android": {
-      "package": "com.tasky.app",
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "buildToolsVersion": "35.0.0",
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF"
-      }
+        "foregroundImage": "./assets/app-icon.png",
+        "backgroundColor": "#FEFFFA"
+      },
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "tasky"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "plugins": [
       "expo-router"
@@ -32,6 +58,10 @@
       "eas": {
         "projectId": "f3f98160-f09d-4c5b-9961-d11f941c3c58"
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/f3f98160-f09d-4c5b-9961-d11f941c3c58"
     }
   }
 }

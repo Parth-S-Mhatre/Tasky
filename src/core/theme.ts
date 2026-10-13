@@ -1,24 +1,29 @@
 import { MD3LightTheme as DefaultTheme } from "react-native-paper";
 
-// Mockup-inspired palette: restrained indigo / blue-violet on neutral light bg.
+// Quiet lavender surfaces and deep violet accents keep the UI branded without
+// relying on gradients or oversized decorative effects.
 export const palette = {
-  primary: "#5B5BD6",
-  primaryDark: "#4A4AC4",
-  primaryContainer: "#E7E7FB",
-  background: "#F6F6FA",
+  primary: "#7042D2",
+  primaryDark: "#211A32",
+  primaryContainer: "#F0EAFC",
+  background: "#FBFAFC",
   surface: "#FFFFFF",
-  text: "#1E1E2A",
-  muted: "#8A8AA3",
-  border: "#E6E6F0",
+  field: "#FFFFFF",
+  text: "#171824",
+  muted: "#777783",
+  border: "#DCDCE3",
+  lavender: "#DCCBFB",
+  lilac: "#9C73EC",
+  gold: "#D2A85F",
   success: "#2E9E63",
-  warning: "#E39A2D",
-  danger: "#D9534F",
-  low: "#E0E7FF",
-  lowText: "#4A5AC4",
-  medium: "#FEF0C7",
-  mediumText: "#B54708",
-  high: "#FEE4E2",
-  highText: "#B42318",
+  warning: "#C89037",
+  danger: "#FF3B30",
+  low: "#EEE8F7",
+  lowText: "#644792",
+  medium: "#F8EFDD",
+  mediumText: "#946B2D",
+  high: "#F8E6E4",
+  highText: "#A14B48",
 };
 
 export const theme = {
@@ -33,7 +38,7 @@ export const theme = {
     onSurface: palette.text,
     outline: palette.border,
   },
-  roundness: 14,
+  roundness: 16,
 };
 
 export const spacing = {
@@ -42,4 +47,17 @@ export const spacing = {
   md: 16,
   lg: 24,
   xl: 32,
+};
+
+/** Consistent control geometry for forms, cards, and actions. */
+export const ios = {
+  hairline: 1,
+  radius: 14,
+  radiusLarge: 22,
+  buttonHeight: 54,
+  fieldHeight: 54,
+};
+
+export const typefaces = {
+  display: "serif" as const,
 };

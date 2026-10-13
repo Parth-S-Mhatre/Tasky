@@ -14,7 +14,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { TaskForm } from "../../src/components/TaskForm";
 import { useTaskStore } from "../../src/state/taskStore";
 import { formatFullDate } from "../../src/core/date";
-import { palette } from "../../src/core/theme";
+import { palette, ios } from "../../src/core/theme";
 import type { TaskInput } from "../../src/domain/task";
 
 /** Task details + edit. Tapping Edit swaps the read-only view for the form. */
@@ -42,7 +42,7 @@ export default function TaskDetails() {
       <View style={styles.center}>
         <Text style={styles.title}>Task not found</Text>
         <Text style={styles.muted}>It may have been deleted.</Text>
-        <Button mode="contained" onPress={() => router.back()} style={styles.btn}>
+        <Button mode="contained" onPress={() => router.back()} style={styles.primary}>
           Go back
         </Button>
       </View>
@@ -72,7 +72,7 @@ export default function TaskDetails() {
               submitLabel="Save changes"
               onSubmit={onSubmit}
             />
-            <Button onPress={() => setEditing(false)} style={{ marginTop: 8 }}>
+            <Button onPress={() => setEditing(false)} style={{ marginTop: 8 }} textColor={palette.primary}>
               Cancel
             </Button>
           </ScrollView>
@@ -86,14 +86,20 @@ export default function TaskDetails() {
       <ScrollView contentContainerStyle={styles.body}>
         <View style={styles.card}>
           <View style={styles.row}>
-            <Checkbox.Android
-              status={task.completed ? "checked" : "unchecked"}
-              onPress={() => void toggle(task.id, !task.completed)}
-              color={palette.primary}
+            <View
+              accessible
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: task.completed }}
               accessibilityLabel={
                 task.completed ? "Mark as incomplete" : "Mark as complete"
               }
-            />
+            >
+              <Checkbox
+                status={task.completed ? "checked" : "unchecked"}
+                onPress={() => void toggle(task.id, !task.completed)}
+                color={palette.primary}
+              />
+            </View>
             <Text
               style={[styles.title, task.completed && styles.done]}
               accessibilityRole="header"
@@ -104,16 +110,19 @@ export default function TaskDetails() {
           {task.description ? (
             <Text style={styles.desc}>{task.description}</Text>
           ) : null}
-          <Text style={styles.meta}>
-            Due {formatFullDate(task.dueDate)}  •  {task.priority} priority  •{" "}
-            {task.completed ? "Completed" : "Pending"}
-          </Text>
+          <View style={styles.metaBox}>
+            <Text style={styles.meta}>Due  {formatFullDate(task.dueDate)}</Text>
+            <Text style={styles.meta}>Priority  {task.priority}</Text>
+            <Text style={styles.meta}>Status  {task.completed ? "Completed" : "Pending"}</Text>
+          </View>
           {error ? <HelperText type="error">{error}</HelperText> : null}
           <View style={styles.actions}>
             <Button
               mode="contained"
               onPress={() => setEditing(true)}
-              style={styles.btn}
+              style={styles.primary}
+              contentStyle={styles.btnContent}
+              labelStyle={styles.btnLabel}
             >
               Edit
             </Button>
@@ -121,6 +130,9 @@ export default function TaskDetails() {
               mode="outlined"
               textColor={palette.danger}
               onPress={() => setConfirm(true)}
+              style={styles.destructive}
+              contentStyle={styles.btnContent}
+              labelStyle={styles.btnLabel}
             >
               Delete
             </Button>
@@ -128,7 +140,7 @@ export default function TaskDetails() {
         </View>
       </ScrollView>
       <Portal>
-        <Dialog visible={confirm} onDismiss={() => setConfirm(false)}>
+        <Dialog visible={confirm} onDismiss={() => setConfirm(false)} style={styles.dialog}>
           <Dialog.Title>Delete task?</Dialog.Title>
           <Dialog.Content>
             <Text>“{task.title}” will be permanently removed.</Text>
@@ -153,21 +165,31 @@ export default function TaskDetails() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: palette.background },
-  body: { padding: 16 },
+  body: { padding: 20, paddingBottom: 28 },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 24,
+    padding: 21,
     borderWidth: 1,
     borderColor: palette.border,
+    shadowColor: palette.primaryDark,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.04,
+    shadowRadius: 14,
+    elevation: 1,
   },
   row: { flexDirection: "row", alignItems: "center", gap: 4 },
-  title: { fontSize: 20, fontWeight: "800", color: palette.text, flex: 1 },
+  title: { fontFamily: "serif", fontSize: 25, fontWeight: "700", letterSpacing: -0.2, color: palette.text, flex: 1 },
   done: { textDecorationLine: "line-through", color: palette.muted },
-  desc: { fontSize: 15, color: palette.text, marginTop: 12, lineHeight: 22 },
-  meta: { fontSize: 13, color: palette.muted, marginTop: 12 },
-  actions: { flexDirection: "row", gap: 10, marginTop: 18 },
-  btn: { backgroundColor: palette.primary, borderRadius: 24 },
+  desc: { fontSize: 16, color: palette.text, marginTop: 12, lineHeight: 23 },
+  metaBox: { marginTop: 18, backgroundColor: palette.background, borderRadius: 16, padding: 15, gap: 9 },
+  meta: { fontSize: 13, color: palette.muted },
+  actions: { gap: 10, marginTop: 22 },
+  primary: { backgroundColor: palette.primaryDark, borderRadius: 15 },
+  btnContent: { height: ios.buttonHeight },
+  btnLabel: { fontSize: 17, fontWeight: "600" },
+  destructive: { borderRadius: 14, borderColor: palette.border, borderWidth: StyleSheet.hairlineWidth },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 28, gap: 8 },
-  muted: { color: palette.muted, textAlign: "center" },
+  muted: { color: palette.muted, textAlign: "center", fontSize: 15 },
+  dialog: { borderRadius: 16, backgroundColor: "#fff" },
 });

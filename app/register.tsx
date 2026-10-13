@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { Text, TextInput, Button, HelperText } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Link } from "expo-router";
+import { StyleSheet } from "react-native";
+import { HelperText, TextInput, Button, Text } from "react-native-paper";
+import { Link, useRouter, type Href } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authSchema, type AuthInput } from "../src/domain/task";
 import { useAuthStore } from "../src/state/authStore";
-import { AppLogo } from "../src/components/AppLogo";
-import { palette } from "../src/core/theme";
+import { isGoogleConfigured } from "../src/core/google";
+import { GoogleSignInSection } from "../src/components/GoogleSignInSection";
+import { AuthShell } from "../src/components/AuthShell";
+import { palette, ios } from "../src/core/theme";
 
 export default function Register() {
   const router = useRouter();
@@ -20,93 +21,93 @@ export default function Register() {
     defaultValues: { email: "", password: "" },
   });
 
-  const submit = handleSubmit(async (v) => {
+  const submit = handleSubmit(async (values) => {
     if (loading) return;
-    const ok = await signUp(v.email, v.password);
-    if (ok) router.replace("/tasks");
+    if (await signUp(values.email, values.password)) router.replace("/home" as Href);
   });
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
-          <View style={{ alignItems: "center" }}><AppLogo /></View>
-          <Text style={styles.h}>Let&apos;s get started!</Text>
+    <AuthShell active="register" footer={<Text style={styles.switch}>Already have an account? <Link href="/login" style={styles.link}>Log in</Link></Text>}>
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, value }, fieldState }) => (
+          <>
+            <Text style={styles.label}>EMAIL ADDRESS</Text>
+            <TextInput
+              mode="outlined"
+              placeholder="you@example.com"
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              returnKeyType="next"
+              right={value.length > 0 && !fieldState.error ? <TextInput.Icon icon="check-circle" color={palette.primary} disabled /> : undefined}
+              value={value}
+              onChangeText={(text) => { clearError(); onChange(text); }}
+              error={!!fieldState.error}
+              style={styles.input}
+              outlineStyle={styles.outline}
+              contentStyle={styles.fieldContent}
+              activeOutlineColor={palette.primary}
+            />
+            {fieldState.error && <HelperText type="error">{fieldState.error.message}</HelperText>}
+          </>
+        )}
+      />
 
-          <Text style={styles.label}>EMAIL ADDRESS</Text>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value }, fieldState }) => (
-              <>
-                <TextInput
-                  mode="outlined"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  placeholder="you@example.com"
-                  value={value}
-                  onChangeText={(t) => { clearError(); onChange(t); }}
-                  error={!!fieldState.error}
-                  outlineStyle={styles.outline}
-                  style={styles.input}
-                />
-                {fieldState.error && <HelperText type="error">{fieldState.error.message}</HelperText>}
-              </>
-            )}
-          />
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, value }, fieldState }) => (
+          <>
+            <Text style={styles.label}>PASSWORD</Text>
+            <TextInput
+              mode="outlined"
+              placeholder="At least 6 characters"
+              secureTextEntry={secure}
+              autoComplete="new-password"
+              returnKeyType="done"
+              onSubmitEditing={submit}
+              right={<TextInput.Icon icon={secure ? "eye-outline" : "eye-off-outline"} onPress={() => setSecure((current) => !current)} />}
+              value={value}
+              onChangeText={(text) => { clearError(); onChange(text); }}
+              error={!!fieldState.error}
+              style={styles.input}
+              outlineStyle={styles.outline}
+              contentStyle={styles.fieldContent}
+              activeOutlineColor={palette.primary}
+            />
+            {fieldState.error && <HelperText type="error">{fieldState.error.message}</HelperText>}
+          </>
+        )}
+      />
 
-          <Text style={styles.label}>PASSWORD</Text>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value }, fieldState }) => (
-              <>
-                <TextInput
-                  mode="outlined"
-                  secureTextEntry={secure}
-                  placeholder="Min. 6 characters"
-                  value={value}
-                  onChangeText={(t) => { clearError(); onChange(t); }}
-                  error={!!fieldState.error}
-                  outlineStyle={styles.outline}
-                  style={styles.input}
-                  right={<TextInput.Icon icon={secure ? "eye" : "eye-off"} onPress={() => setSecure((s) => !s)} />}
-                />
-                {fieldState.error && <HelperText type="error">{fieldState.error.message}</HelperText>}
-              </>
-            )}
-          />
-
-          {error && <HelperText type="error">{error}</HelperText>}
-
-          <Button
-            mode="contained"
-            onPress={submit}
-            loading={loading}
-            disabled={loading || !formState.isValid}
-            style={styles.btn}
-            contentStyle={{ height: 52 }}
-          >
-            Sign up
-          </Button>
-
-          <Text style={styles.switch}>
-            Already an account? <Link href="/login" style={styles.link}>Log in</Link>
-          </Text>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      {error && <HelperText type="error" style={styles.error}>{error}</HelperText>}
+      <Button
+        mode="contained"
+        onPress={submit}
+        loading={loading}
+        disabled={loading || !formState.isValid}
+        style={styles.primary}
+        contentStyle={styles.primaryContent}
+        labelStyle={styles.primaryLabel}
+      >
+        Create account
+      </Button>
+      {isGoogleConfigured && <GoogleSignInSection active="register" />}
+    </AuthShell>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#fff" },
-  wrap: { padding: 28 },
-  h: { fontSize: 22, fontWeight: "800", textAlign: "center", marginVertical: 20, color: palette.text },
-  label: { fontSize: 11, color: palette.muted, fontWeight: "700", marginTop: 12, marginBottom: 6 },
-  input: { backgroundColor: "#F4F4F9" },
-  outline: { borderRadius: 22, borderColor: palette.border },
-  btn: { borderRadius: 28, marginTop: 20, backgroundColor: palette.primary },
-  switch: { textAlign: "center", marginTop: 20, color: palette.muted },
-  link: { color: palette.primary, fontWeight: "700" },
+  label: { color: palette.text, fontSize: 11, fontWeight: "600", letterSpacing: 1.15, marginTop: 14, marginBottom: 7 },
+  input: { backgroundColor: "#fff", marginBottom: 4 },
+  outline: { borderRadius: 10, borderColor: palette.border },
+  fieldContent: { minHeight: ios.fieldHeight },
+  error: { marginTop: 8, lineHeight: 19 },
+  primary: { borderRadius: 12, marginTop: 18, backgroundColor: palette.primary },
+  primaryContent: { height: ios.buttonHeight },
+  primaryLabel: { fontSize: 16, fontWeight: "700", letterSpacing: 0.2 },
+  switch: { color: palette.muted, fontSize: 13 },
+  link: { color: palette.primary, fontWeight: "600" },
 });

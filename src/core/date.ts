@@ -10,6 +10,29 @@ export function addDays(d: Date, n: number): Date {
   return c;
 }
 
+/** Add calendar months while clamping dates such as Jan 31 to month end. */
+export function addMonths(d: Date, n: number): Date {
+  const target = new Date(d.getFullYear(), d.getMonth() + n, 1);
+  const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+  target.setDate(Math.min(d.getDate(), lastDay));
+  target.setHours(d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds());
+  return target;
+}
+
+/** Local calendar key (not UTC) for matching date-only calendar cells. */
+export function dateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Parse a local YYYY-MM-DD value without JavaScript's UTC date-string shift. */
+export function parseDateKey(value: string | undefined): Date | undefined {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(year!, month! - 1, day!, 12);
+  if (dateKey(parsed) !== value) return undefined;
+  return parsed;
+}
+
 /** Consistent short label, e.g. "1 May". Avoids locale surprises in list. */
 export function formatDueDate(d: Date): string {
   const day = d.getDate();

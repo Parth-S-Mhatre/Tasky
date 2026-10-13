@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { memo } from "react";
 import { View, StyleSheet, Pressable } from "react-native";
-import { Text, Checkbox, IconButton, Dialog, Portal, Button } from "react-native-paper";
+import { Text, Checkbox, IconButton } from "react-native-paper";
 import type { Task } from "../domain/task";
 import { formatDueDate } from "../core/date";
 import { palette } from "../core/theme";
@@ -11,95 +11,99 @@ const priorityStyle: Record<Task["priority"], { bg: string; fg: string; label: s
   high: { bg: palette.high, fg: palette.highText, label: "High" },
 };
 
-export function TaskCard({
-  task,
-  onToggle,
-  onEdit,
-  onDelete,
-}: {
+interface TaskCardProps {
   task: Task;
   onToggle: () => void;
   onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const [confirm, setConfirm] = useState(false);
+  /** Called when the user confirms deletion via the list-level dialog. */
+  onDeleteRequest: () => void;
+  grouped?: boolean;
+  divider?: boolean;
+}
+
+/**
+ * Pure task row. No Portal/Dialog here — the delete confirmation dialog is
+ * owned by the list screen (one dialog for the whole list, not one per card).
+ * Wrapped in React.memo so it only re-renders when its own props change.
+ */
+export const TaskCard = memo(function TaskCard({
+  task,
+  onToggle,
+  onEdit,
+  onDeleteRequest,
+  grouped = false,
+  divider = false,
+}: TaskCardProps) {
   const p = priorityStyle[task.priority];
 
   return (
-    <>
-      <View style={[styles.card, task.completed && styles.doneCard]}>
-        <Checkbox.Android
+    <View style={[styles.card, grouped && styles.groupedCard, divider && styles.divider, task.completed && styles.doneCard]}>
+      {/* Platform-appropriate checkbox */}
+      <View
+        accessible
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: task.completed }}
+        accessibilityLabel={task.completed ? "Mark as incomplete" : "Mark as complete"}
+      >
+        <Checkbox
           status={task.completed ? "checked" : "unchecked"}
           onPress={onToggle}
           color={palette.primary}
-          accessibilityLabel={task.completed ? "Mark as incomplete" : "Mark as complete"}
-        />
-        <Pressable style={styles.body} onPress={onEdit} accessibilityRole="button">
-          <Text
-            style={[styles.title, task.completed && styles.doneTitle]}
-            numberOfLines={2}
-          >
-            {task.title}
-          </Text>
-          <Text style={styles.date}>{formatDueDate(task.dueDate)}</Text>
-        </Pressable>
-        <View style={[styles.chip, { backgroundColor: p.bg }]}>
-          <Text style={[styles.chipText, { color: p.fg }]}>{p.label}</Text>
-        </View>
-        <IconButton
-          icon="delete-outline"
-          iconColor={palette.danger}
-          size={20}
-          onPress={() => setConfirm(true)}
-          accessibilityLabel={`Delete ${task.title}`}
         />
       </View>
-
-      <Portal>
-        <Dialog visible={confirm} onDismiss={() => setConfirm(false)}>
-          <Dialog.Title>Delete task?</Dialog.Title>
-          <Dialog.Content>
-            <Text>“{task.title}” will be permanently removed.</Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setConfirm(false)}>Cancel</Button>
-            <Button
-              textColor={palette.danger}
-              onPress={() => {
-                setConfirm(false);
-                onDelete();
-              }}
-            >
-              Delete
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </>
+      <Pressable style={styles.body} onPress={onEdit} accessibilityRole="button" accessibilityLabel={`Edit ${task.title}`}>
+        <Text
+          style={[styles.title, task.completed && styles.doneTitle]}
+          numberOfLines={2}
+        >
+          {task.title}
+        </Text>
+        <View style={styles.meta}>
+          <Text style={styles.date}>{formatDueDate(task.dueDate)}</Text>
+          <View style={[styles.chip, { backgroundColor: p.bg }]}>
+            <Text style={[styles.chipText, { color: p.fg }]}>{p.label}</Text>
+          </View>
+        </View>
+      </Pressable>
+      <IconButton
+        icon="trash-can-outline"
+        iconColor={palette.muted}
+        size={19}
+        onPress={onDeleteRequest}
+        accessibilityLabel={`Delete ${task.title}`}
+        style={styles.delete}
+      />
+    </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 14,
-    paddingVertical: 8,
-    paddingHorizontal: 6,
+    borderRadius: 15,
+    paddingVertical: 7,
+    paddingLeft: 1,
+    paddingRight: 0,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: palette.border,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowColor: palette.primaryDark,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.035,
+    shadowRadius: 8,
     elevation: 1,
   },
-  doneCard: { opacity: 0.65 },
-  body: { flex: 1, paddingHorizontal: 4 },
-  title: { fontSize: 15, fontWeight: "600", color: palette.text },
+  groupedCard: { borderWidth: 0, borderRadius: 0, paddingVertical: 3, marginBottom: 0, shadowOpacity: 0, elevation: 0 },
+  divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: palette.border },
+  doneCard: { opacity: 0.6 },
+  body: { flex: 1, paddingHorizontal: 5, paddingVertical: 5 },
+  title: { fontSize: 14, fontWeight: "500", letterSpacing: -0.1, color: palette.text },
   doneTitle: { textDecorationLine: "line-through", color: palette.muted },
-  date: { fontSize: 12, color: palette.muted, marginTop: 2 },
-  chip: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, marginRight: 2 },
-  chipText: { fontSize: 11, fontWeight: "700" },
+  meta: { flexDirection: "row", alignItems: "center", marginTop: 4, gap: 8 },
+  date: { fontSize: 11, color: palette.muted },
+  chip: { borderRadius: 8, paddingHorizontal: 7, paddingVertical: 2 },
+  chipText: { fontSize: 10, fontWeight: "600" },
+  delete: { margin: 0, opacity: 0.55, width: 34 },
 });
