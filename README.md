@@ -89,6 +89,7 @@ src/
 assets/
   app-icon.png               Launcher icon used by Expo config
   brand/                     Original logo source artwork
+docs/architecture/           App architecture diagram, editable SVG, source upload
 docs/workflow/               Workflow overview and numbered Android screenshots
 releases/android/            Supplied installable Android APK
 android/                     Native Android Gradle project and application ID
@@ -207,6 +208,21 @@ remote source, and the Expo Updates `runtimeVersion` is manually set to
 `1.0.0`; update it deliberately when changing the app version/build compatibility.
 
 ## Application architecture
+
+![Tasky architecture diagram](docs/architecture/tasky-architecture.png)
+
+The diagram follows the main flows from the screens through Zustand state and
+the Firebase repositories to Authentication and Firestore. The supporting
+boxes show native Google sign-in, AsyncStorage session persistence, task-domain
+validation/filtering, and server-side Firestore rules. The editable vector
+source is [tasky-architecture.svg](docs/architecture/tasky-architecture.svg).
+
+The uploaded [`diagram.png`](docs/architecture/tasky-architecture-source.png)
+contains the right core components, but its 8,028 × 11,036 layout has many
+crossing connectors and small labels that are difficult to read in a README.
+It also groups domain validation as task rules without showing the separate
+`firestore.rules` security layer. The diagram above is a condensed, code-aligned
+version; the original upload is retained for reference.
 
 - **Routes (`app/`)**: Expo Router screens. `_layout.tsx` restores Firebase
   auth state and redirects signed-out users to login and signed-in users away

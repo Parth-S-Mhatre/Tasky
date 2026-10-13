@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" role="img" aria-labelledby="title description">
+  <title id="title">Tasky application architecture</title>
+  <desc id="description">Two main flows show authentication and task data passing from Expo Router screens through Zustand state and repositories to Firebase. Supporting elements show native Google sign-in, AsyncStorage persistence, domain validation and filtering, and Firestore security rules.</desc>
+  <defs>
+    <style>
+      .title { font-family: 'DejaVu Sans', sans-serif; font-size: 38px; font-weight: 700; fill: #211a32; }
+      .subtitle { font-family: 'DejaVu Sans', sans-serif; font-size: 18px; font-weight: 400; fill: #686276; }
+      .section { font-family: 'DejaVu Sans', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 1.7px; fill: #817994; }
+      .box-title { font-family: 'DejaVu Sans', sans-serif; font-size: 19px; font-weight: 700; fill: #29243a; }
+      .box-copy { font-family: 'DejaVu Sans', sans-serif; font-size: 15px; font-weight: 400; fill: #625c70; }
+      .flow-label { font-family: 'DejaVu Sans', sans-serif; font-size: 13px; font-weight: 600; fill: #655e73; }
+      .note { font-family: 'DejaVu Sans', sans-serif; font-size: 14px; font-weight: 400; fill: #686276; }
+      .line { fill: none; stroke: #6b6380; stroke-width: 2.5; }
+      .support-line { fill: none; stroke: #6653bd; stroke-width: 2.5; }
+      .arrow-head { fill: #6b6380; }
+      .support-head { fill: #6653bd; }
+      .dashed { stroke-dasharray: 7 7; }
+      .card { stroke-width: 1.5; rx: 16; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1120" fill="#f8f7fb"/>
+  <text x="60" y="70" class="title">Tasky application architecture</text>
+  <text x="60" y="106" class="subtitle">Expo Router · React Native · Zustand · Firebase</text>
+
+  <text x="60" y="160" class="section">AUTHENTICATION FLOW</text>
+
+  <!-- Authentication path -->
+  <rect x="60" y="185" width="270" height="140" class="card" fill="#eaf1ff" stroke="#6d8fe6"/>
+  <text x="82" y="222" class="box-title">Auth routes</text>
+  <text x="82" y="252" class="box-copy">_layout.tsx session gate</text>
+  <text x="82" y="277" class="box-copy">login.tsx · register.tsx</text>
+  <text x="82" y="302" class="box-copy">Email and password forms</text>
+
+  <rect x="360" y="185" width="270" height="140" class="card" fill="#eeeaff" stroke="#9076dc"/>
+  <text x="382" y="222" class="box-title">Auth state</text>
+  <text x="382" y="252" class="box-copy">Zustand · authStore.ts</text>
+  <text x="382" y="277" class="box-copy">Session, loading, error state</text>
+  <text x="382" y="302" class="box-copy">Redirects follow auth changes</text>
+
+  <rect x="660" y="185" width="270" height="140" class="card" fill="#fff2df" stroke="#e4a14a"/>
+  <text x="682" y="222" class="box-title">Auth repository</text>
+  <text x="682" y="252" class="box-copy">authRepository.ts</text>
+  <text x="682" y="277" class="box-copy">Sign up · sign in · reset</text>
+  <text x="682" y="302" class="box-copy">Google credential exchange</text>
+
+  <rect x="960" y="185" width="270" height="140" class="card" fill="#f0edfa" stroke="#9076dc"/>
+  <text x="982" y="222" class="box-title">Firebase clients</text>
+  <text x="982" y="252" class="box-copy">core/firebase.ts</text>
+  <text x="982" y="277" class="box-copy">Auth + Firestore instances</text>
+  <text x="982" y="302" class="box-copy">AsyncStorage persistence</text>
+
+  <rect x="1260" y="185" width="270" height="140" class="card" fill="#e8f7f0" stroke="#54a987"/>
+  <text x="1282" y="222" class="box-title">Firebase Authentication</text>
+  <text x="1282" y="252" class="box-copy">Email/password provider</text>
+  <text x="1282" y="277" class="box-copy">Google ID token via</text>
+  <text x="1282" y="302" class="box-copy">signInWithCredential</text>
+
+  <path d="M330 255 H352" class="line"/>
+  <path d="M630 255 H652" class="line"/>
+  <path d="M930 255 H952" class="line"/>
+  <path d="M1230 255 H1252" class="line"/>
+  <polygon points="360,255 351,250 351,260" class="arrow-head"/>
+  <polygon points="660,255 651,250 651,260" class="arrow-head"/>
+  <polygon points="960,255 951,250 951,260" class="arrow-head"/>
+  <polygon points="1260,255 1251,250 1251,260" class="arrow-head"/>
+
+  <!-- Native Google side flow -->
+  <rect x="60" y="375" width="270" height="112" class="card" fill="#f1edff" stroke="#9076dc"/>
+  <text x="82" y="412" class="box-title">Google sign-in hook</text>
+  <text x="82" y="442" class="box-copy">useGoogleAuth.ts</text>
+  <text x="82" y="466" class="box-copy">Gets token, calls auth state</text>
+
+  <rect x="390" y="375" width="270" height="112" class="card" fill="#eaf1ff" stroke="#6d8fe6"/>
+  <text x="412" y="412" class="box-title">Native Google SDK</text>
+  <text x="412" y="442" class="box-copy">@react-native-google-signin/</text>
+  <text x="412" y="466" class="box-copy">google-signin</text>
+
+  <path d="M330 430 H382" class="support-line"/>
+  <polygon points="390,430 381,425 381,435" class="support-head"/>
+  <text x="344" y="414" class="flow-label">sign in</text>
+  <polyline points="390,478 345,478 345,520 195,520 195,487" fill="none" stroke="#6653bd" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <polygon points="195,487 190,496 200,496" class="support-head"/>
+  <text x="334" y="545" class="flow-label">returns Google ID token</text>
+  <path d="M195 375 V347 H495 V327" class="support-line"/>
+  <polygon points="495,327 490,336 500,336" class="support-head"/>
+  <text x="257" y="367" class="flow-label">signInWithGoogle(token)</text>
+
+  <rect x="960" y="375" width="270" height="112" class="card" fill="#fff" stroke="#c8c2d4"/>
+  <text x="982" y="412" class="box-title">Session persistence</text>
+  <text x="982" y="442" class="box-copy">Firebase Auth persists through</text>
+  <text x="982" y="466" class="box-copy">React Native AsyncStorage</text>
+  <path d="M1095 375 V345 H1095 V333" fill="none" stroke="#6653bd" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <polygon points="1095,327 1090,336 1100,336" class="support-head"/>
+
+  <text x="60" y="575" class="section">TASK DATA FLOW</text>
+
+  <!-- Task data path -->
+  <rect x="60" y="600" width="270" height="152" class="card" fill="#eaf1ff" stroke="#6d8fe6"/>
+  <text x="82" y="638" class="box-title">Task screens</text>
+  <text x="82" y="668" class="box-copy">Home · My Tasks · Calendar</text>
+  <text x="82" y="693" class="box-copy">Create · details/edit</text>
+  <text x="82" y="723" class="box-copy">Search, filters, task form</text>
+
+  <rect x="360" y="600" width="270" height="152" class="card" fill="#eeeaff" stroke="#9076dc"/>
+  <text x="382" y="638" class="box-title">Task state</text>
+  <text x="382" y="668" class="box-copy">Zustand · taskStore.ts</text>
+  <text x="382" y="693" class="box-copy">Live task subscription</text>
+  <text x="382" y="723" class="box-copy">Create · edit · complete · delete</text>
+
+  <rect x="660" y="600" width="270" height="152" class="card" fill="#fff2df" stroke="#e4a14a"/>
+  <text x="682" y="638" class="box-title">Task repository</text>
+  <text x="682" y="668" class="box-copy">taskRepository.ts</text>
+  <text x="682" y="693" class="box-copy">onSnapshot subscription</text>
+  <text x="682" y="723" class="box-copy">Firestore task writes</text>
+
+  <rect x="960" y="600" width="270" height="152" class="card" fill="#f0edfa" stroke="#9076dc"/>
+  <text x="982" y="638" class="box-title">Firebase clients</text>
+  <text x="982" y="668" class="box-copy">core/firebase.ts</text>
+  <text x="982" y="693" class="box-copy">Provides Firestore client</text>
+  <text x="982" y="723" class="box-copy">Configured from EXPO_PUBLIC_*</text>
+
+  <rect x="1260" y="600" width="270" height="152" class="card" fill="#e8f7f0" stroke="#54a987"/>
+  <text x="1282" y="638" class="box-title">Cloud Firestore</text>
+  <text x="1282" y="668" class="box-copy">users/{uid}/tasks/{taskId}</text>
+  <text x="1282" y="693" class="box-copy">Realtime task snapshots</text>
+  <text x="1282" y="723" class="box-copy">Per-user task documents</text>
+
+  <path d="M330 676 H352" class="line"/>
+  <path d="M630 676 H652" class="line"/>
+  <path d="M930 676 H952" class="line"/>
+  <path d="M1230 676 H1252" class="line"/>
+  <polygon points="360,676 351,671 351,681" class="arrow-head"/>
+  <polygon points="660,676 651,671 651,681" class="arrow-head"/>
+  <polygon points="960,676 951,671 951,681" class="arrow-head"/>
+  <polygon points="1260,676 1251,671 1251,681" class="arrow-head"/>
+
+  <!-- Cross-cutting task validation and backend authorization -->
+  <rect x="360" y="825" width="570" height="118" class="card" fill="#fff" stroke="#c8c2d4"/>
+  <text x="384" y="862" class="box-title">Task domain · src/domain/task.ts</text>
+  <text x="384" y="892" class="box-copy">Zod schemas · due-date grouping · priority/status filtering · stable sorting</text>
+  <text x="384" y="920" class="box-copy">Used by form validation and the task state layer</text>
+  <path d="M495 752 V823" fill="none" stroke="#6653bd" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <polygon points="495,831 490,822 500,822" class="support-head"/>
+
+  <rect x="1260" y="825" width="270" height="118" class="card" fill="#fff" stroke="#54a987"/>
+  <text x="1282" y="862" class="box-title">Firestore rules</text>
+  <text x="1282" y="892" class="box-copy">firestore.rules</text>
+  <text x="1282" y="920" class="box-copy">Owner UID + task validation</text>
+  <path d="M1395 752 V823" fill="none" stroke="#6653bd" stroke-width="2.5" stroke-dasharray="7 7"/>
+  <polygon points="1395,831 1390,822 1400,822" class="support-head"/>
+
+  <rect x="60" y="1000" width="1470" height="66" rx="14" fill="#eeeaff" stroke="#d9d1ee"/>
+  <text x="84" y="1040" class="note">Native Google sign-in requires an installed development or preview build; Expo Go does not include the native module.</text>
+</svg>
